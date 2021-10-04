@@ -1,10 +1,11 @@
 function importStructure(context) {
     var builder = context.getStructureBuilder();
  
-    ai.log.logInfo('Creating table...');
     var table = builder.addTable('acctsPybl');
     table.setDisplayName('AccountsPayable');    
- 
+
+    ai.log.logInfo(`Creating table ${table.id}`);
+    
     var i=0;
     createColumn(table  , "id"              , "ID"          , i++   , true , "string");
     createColumn(table  , "tx_date"         , "tx_date"     , i++   , true , "date");
@@ -30,5 +31,5 @@ function importStructure(context) {
             default : ai.log.logInfo('Invalid Column', 'Column ' + columnID); break;
         }
     }
-    ai.log.logInfo('Table created successfully');
+    ai.log.logInfo(`${table.id} table created successfully`);
 }
