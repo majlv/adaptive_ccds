@@ -9,9 +9,6 @@ function importData(context) {
     var headers = { };
     
     var tableId = context.getRowset(['id']).getTableId();
-
-    // var columnsMap = [];
-    // var dataCell = [];
     
     // Accounts Payable
     var apTable = 'acctsPybl';
@@ -30,9 +27,6 @@ function importData(context) {
         if (tableId == table) {
             var dataRowset = context.getRowset(colArray);
             var dataColumns = dataRowset.getColumns();
-            
-            // Get indices for each column for a column map
-            
             
             requestURL = `${apiEndpoint}/v3/company/${realmID}/reports/GeneralLedger?start_date=${startDateString}&end_date=${endDateString}&accounting_method=Accrual&account=${acctId}&minorversion=62`;
             var response = ai.https.authorizedRequest(requestURL, method, body, headers);
