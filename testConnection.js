@@ -29,8 +29,7 @@ function testConnection(context) {
         var resHeader = JSON.stringify(response.getHeaders());
         var resHttpCode = JSON.stringify(response.getHttpCode());
         var headerData = JSON.parse(JSON.stringify(response.getHeaders()));
-        ai.log.logInfo(headerData["Cache-Control"],JSON.stringify(Object.keys(headerData)));
-        ai.log.logInfo(response.getHttpCode(),JSON.stringify(Object.keys(response)));
+        ai.log.logInfo(`Response Status Code: ${response.getHttpCode()}`, `Connectionn successful!`);
         // ******* parsing logic here *******
     	return true;
     } else {
