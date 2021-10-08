@@ -1,0 +1,64 @@
+"Columns": {
+  "Column": [
+   {
+    "ColTitle": "Account #",
+    "ColType": "String",
+    "MetaData": [
+     {
+      "Name": "ColKey",
+      "Value": "acct_num_with_extn"
+     }
+    ]
+   },
+   {
+    "ColTitle": "Account",
+    "ColType": "String",
+    "MetaData": [
+     {
+      "Name": "ColKey",
+      "Value": "account_name"
+     }
+    ]
+   },
+   {
+    "ColTitle": "Type",
+    "ColType": "String",
+    "MetaData": [
+     {
+      "Name": "ColKey",
+      "Value": "account_type"
+     }
+    ]
+   },
+   {
+    "ColTitle": "Detail type",
+    "ColType": "String",
+    "MetaData": [
+     {
+      "Name": "ColKey",
+      "Value": "detail_acc_type"
+     }
+    ]
+   },
+   {
+    "ColTitle": "Description",
+    "ColType": "String",
+    "MetaData": [
+     {
+      "Name": "ColKey",
+      "Value": "account_desc"
+     }
+    ]
+   },
+   {
+    "ColTitle": "Balance",
+    "ColType": "Money",
+    "MetaData": [
+     {
+      "Name": "ColKey",
+      "Value": "account_bal"
+     }
+    ]
+   }
+  ]
+ },
