@@ -17,7 +17,7 @@ function importStructure(context) {
         throw "Connection Error";
     }
     
-    // Get the Account List from QB
+    // Get the Account List from Quickbooks
     if (response.getHttpCode() === 200) {
         responseBody = response.getBody();
         var accountsData = JSON.parse(responseBody).Rows.Row;
@@ -38,7 +38,7 @@ function importStructure(context) {
     var builder = context.getStructureBuilder();
     
     for (i = 0; i < accountList.length; i++) {
-        table = builder.addTable(accountList[i].id);
+        var table = builder.addTable(accountList[i].id);
         table.setDisplayName(accountList[i].name);
         
         createColumn(table  , "id"              , "ID"          , 1   , true , "string");
@@ -51,28 +51,19 @@ function importStructure(context) {
         createColumn(table  , "memo"            , "memo"        , 8   , true , "string");
         createColumn(table  , "split_acc"       , "split_acc"   , 9   , true , "string");
     }
-
-    // var table = '';
-    // var i = 0;
- 
-    // // Build Accounts Payable Table
-    // table = builder.addTable('acctsPybl');
-    // table.setDisplayName('AccountsPayable');    
-
-    // ai.log.logInfo(`Creating table ${table.id}`);
     
-    // i=0;
-    // createColumn(table  , "id"              , "ID"          , i++   , true , "string");
-    // createColumn(table  , "tx_date"         , "tx_date"     , i++   , true , "date");
-    // createColumn(table  , "amount"          , "amount"      , i++   , true , "number");
-    // createColumn(table  , "balance"         , "balance"     , i++   , true , "number");
-    // createColumn(table  , "tx_type"         , "tx_type"     , i++   , true , "string");
-    // createColumn(table  , "doc_num"         , "doc_num"     , i++   , true , "string");
-    // createColumn(table  , "name"            , "name"        , i++   , true , "string");
-    // createColumn(table  , "memo"            , "memo"        , i++   , true , "string");
-    // createColumn(table  , "split_acc"       , "split_acc"   , i++   , true , "string");
-    
-    // ai.log.logInfo(`${table.id} table created successfully`);
+    // Construct a summary transactions table for all accounts
+    var summaryTable = builder.addTable('adaptive_sum_txns');
+    summaryTable.setDisplayName('Adaptive Summary Transactions');
+    createColumn(summaryTable  , "id"              , "ID"          , 1   , true , "string");
+    createColumn(summaryTable  , "tx_date"         , "tx_date"     , 2   , true , "date");
+    createColumn(summaryTable  , "amount"          , "amount"      , 3   , true , "number");
+    createColumn(summaryTable  , "balance"         , "balance"     , 4   , true , "number");
+    createColumn(summaryTable  , "tx_type"         , "tx_type"     , 5   , true , "string");
+    createColumn(summaryTable  , "doc_num"         , "doc_num"     , 6   , true , "string");
+    createColumn(summaryTable  , "name"            , "name"        , 7   , true , "string");
+    createColumn(summaryTable  , "memo"            , "memo"        , 8   , true , "string");
+    createColumn(summaryTable  , "split_acc"       , "split_acc"   , 9   , true , "string");
     
     // createColumn Function
     function createColumn(table, columnId, columnDisplay, displayOrder, reqImport, dataType) {
