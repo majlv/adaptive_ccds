@@ -24,8 +24,8 @@ function importData(context) {
         var dataRowset = context.getRowset(rowset);
         
         // Import the data
-        // for (i = 0; i < accountsData.length; i++) {
-        for (i = 0; i < 8; i++) {
+        for (i = 0; i < accountsData.length; i++) {
+        // for (i = 0; i < 10; i++) {
             var internalActId = accountsData[i].Id;
             var importDataMethod = 'GET';
             var importDataBody = '';
@@ -49,28 +49,38 @@ function importData(context) {
                     // ai.log.logVerbose('Connection successful. Retrieving data...');
                     var importDataResponseBody = importDataResponse.getBody();
                     // ai.log.logInfo("Response Body", importDataResponseBody);
-                    var dataHeaderActId = JSON.parse(importDataResponseBody).Rows.Row[0].Header.ColData[0].id;  // Get internal QB account id
-                    
+
                     // Locate the embedded object within the JSON response containing the rows of data
                     var data = JSON.parse(importDataResponseBody);
-                    ai.log.logInfo('Acct ID: ', JSON.stringify(dataHeaderActId));
                     // ai.log.logInfo('Getting row count...', `${data.length} rows`);
+                    
+                    if (JSON.parse(data.Header.Option[0].Value)) {
+                        ai.log.logInfo("No data found for this account");
+                    } else {
+                        var dataHeaderActId = JSON.parse(importDataResponseBody).Rows.Row[0].Header.ColData[0].id;  // Get internal QB account id
+                        ai.log.logInfo('Acct ID: ', JSON.stringify(dataHeaderActId));
+                    }
                     
                     var dataLocation;
                     var dataLength;
+                    
+                    // ai.log.logInfo('testing', typeof(data.Header.Option[0].Value));
+                    // ai.log.logInfo('testing', typeof(JSON.parse(data.Header.Option[0].Value)));
+                    // ai.log.logInfo('testing', JSON.parse(data.Header.Option[0].Value));
+                    // ai.log.logInfo('testing', data.Header);
 
                     switch(true) {
-                        case Object.keys(data.Rows).length === 0:
+                        case JSON.parse(data.Header.Option[0].Value):
                             ai.log.logInfo("No data in this row"); break;
                         case data.Rows.Row[0].Rows.Row[0].hasOwnProperty('ColData'):
                             dataLocation = data.Rows.Row[0].Rows.Row;
                             dataLength = data.Rows.Row[0].Rows.Row.length;
-                            ai.log.logInfo("normal leaf");
+                            // ai.log.logInfo("normal leaf");
                             importData(dataLength, dataLocation); break;
                         case data.Rows.Row[0].Rows.Row[0].Rows.Row[0].hasOwnProperty('ColData'):
                             dataLocation = data.Rows.Row[0].Rows.Row[0].Rows.Row;
                             dataLength = data.Rows.Row[0].Rows.Row[0].Rows.Row.length;
-                            ai.log.logInfo("nested leaf");
+                            // ai.log.logInfo("nested leaf");
                             importData(dataLength, dataLocation); break;
                         default:
                             ai.log.logInfo("nothing found to swtich");
