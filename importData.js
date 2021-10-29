@@ -25,19 +25,16 @@ function importData(context) {
         
         // Import the data
         for (i = 0; i < accountsData.length; i++) {
-        // for (i = 0; i < 10; i++) {
             var internalActId = accountsData[i].Id;
             var importDataMethod = 'GET';
             var importDataBody = '';
             var importDataHeaders = {};
             var importDataRequestURL = `${apiEndpoint}/v3/company/${realmID}/reports/GeneralLedger?start_date=${startDateString}&end_date=${endDateString}&accounting_method=Accrual&account=${parseInt(internalActId)}`;
             var importDataResponse = ai.https.authorizedRequest(importDataRequestURL, importDataMethod, importDataBody, importDataHeaders);
-            // ai.log.logInfo("Request URL", importDataRequestURL);
     
             if (tableId == "adaptive_sum_txns") {
                 try {
-                    // ai.log.logInfo("Trying to get data from source...", `Connecting to ${apiEndpoint}`);
-                    // ai.log.logInfo("Import Data Response HTTP Code", importDataResponse.getHttpCode());
+                    ai.log.logInfo("Trying to get data from source...", `Connecting to ${apiEndpoint}`);
                     importDataResponse;
                 }
                 catch (exception) {
@@ -46,13 +43,12 @@ function importData(context) {
                 }
                 
                 if (importDataResponse.getHttpCode() == '200') {
-                    // ai.log.logVerbose('Connection successful. Retrieving data...');
+                    ai.log.logVerbose('Connection successful. Retrieving data...');
                     var importDataResponseBody = importDataResponse.getBody();
-                    // ai.log.logInfo("Response Body", importDataResponseBody);
 
                     // Locate the embedded object within the JSON response containing the rows of data
                     var data = JSON.parse(importDataResponseBody);
-                    // ai.log.logInfo('Getting row count...', `${data.length} rows`);
+                    ai.log.logInfo('Getting row count...', `${data.length} rows`);
                     
                     if (JSON.parse(data.Header.Option[0].Value)) {
                         ai.log.logInfo("No data found for this account");
@@ -63,11 +59,6 @@ function importData(context) {
                     
                     var dataLocation;
                     var dataLength;
-                    
-                    // ai.log.logInfo('testing', typeof(data.Header.Option[0].Value));
-                    // ai.log.logInfo('testing', typeof(JSON.parse(data.Header.Option[0].Value)));
-                    // ai.log.logInfo('testing', JSON.parse(data.Header.Option[0].Value));
-                    // ai.log.logInfo('testing', data.Header);
 
                     switch(true) {
                         case JSON.parse(data.Header.Option[0].Value):
@@ -75,12 +66,10 @@ function importData(context) {
                         case data.Rows.Row[0].Rows.Row[0].hasOwnProperty('ColData'):
                             dataLocation = data.Rows.Row[0].Rows.Row;
                             dataLength = data.Rows.Row[0].Rows.Row.length;
-                            // ai.log.logInfo("normal leaf");
                             importData(dataLength, dataLocation); break;
                         case data.Rows.Row[0].Rows.Row[0].Rows.Row[0].hasOwnProperty('ColData'):
                             dataLocation = data.Rows.Row[0].Rows.Row[0].Rows.Row;
                             dataLength = data.Rows.Row[0].Rows.Row[0].Rows.Row.length;
-                            // ai.log.logInfo("nested leaf");
                             importData(dataLength, dataLocation); break;
                         default:
                             ai.log.logInfo("nothing found to swtich");
