@@ -20,68 +20,70 @@ function importData(context) {
         ai.log.logInfo("Accounts Data length", accountsData.length);
 
         var tableId = context.getRowset(['id']).getTableId();
+        ai.log.logInfo("Current Table: ", tableId);
         var rowset = ["id", "tx_date", "amount", "balance", "tx_type", "doc_num", "name", "memo", "split_acc"];
         var dataRowset = context.getRowset(rowset);
         
-        // Import the data
-        for (i = 0; i < accountsData.length; i++) {
-            var internalActId = accountsData[i].Id;
-            var importDataMethod = 'GET';
-            var importDataBody = '';
-            var importDataHeaders = {};
-            var importDataRequestURL = `${apiEndpoint}/v3/company/${realmID}/reports/GeneralLedger?start_date=${startDateString}&end_date=${endDateString}&accounting_method=Accrual&account=${parseInt(internalActId)}`;
-            var importDataResponse = ai.https.authorizedRequest(importDataRequestURL, importDataMethod, importDataBody, importDataHeaders);
+        // Import the summary transactions data
+        if (tableId == "adaptive_sum_txns") {
+            for (i = 0; i < accountsData.length; i++) {
+                var internalActId = accountsData[i].Id;
+                var importDataMethod = 'GET';
+                var importDataBody = '';
+                var importDataHeaders = {};
+                var importDataRequestURL = `${apiEndpoint}/v3/company/${realmID}/reports/GeneralLedger?start_date=${startDateString}&end_date=${endDateString}&accounting_method=Accrual&account=${parseInt(internalActId)}`;
+                var importDataResponse = ai.https.authorizedRequest(importDataRequestURL, importDataMethod, importDataBody, importDataHeaders);
+        
+                if (tableId == "adaptive_sum_txns") {
+                    try {
+                        // ai.log.logInfo("Trying to get data from source...", `Connecting to ${apiEndpoint}`);
+                        importDataResponse;
+                    }
+                    catch (exception) {
+                        ai.log.logError('HTTPS connection request failed', +exception);
+                        throw "Connection Error";
+                    }
+                    
+                    if (importDataResponse.getHttpCode() == '200') {
+                        // ai.log.logVerbose('Connection successful. Retrieving data...');
+                        var importDataResponseBody = importDataResponse.getBody();
     
-            if (tableId == "adaptive_sum_txns") {
-                try {
-                    ai.log.logInfo("Trying to get data from source...", `Connecting to ${apiEndpoint}`);
-                    importDataResponse;
-                }
-                catch (exception) {
-                    ai.log.logError('HTTPS connection request failed', +exception);
-                    throw "Connection Error";
-                }
-                
-                if (importDataResponse.getHttpCode() == '200') {
-                    ai.log.logVerbose('Connection successful. Retrieving data...');
-                    var importDataResponseBody = importDataResponse.getBody();
-
-                    // Locate the embedded object within the JSON response containing the rows of data
-                    var data = JSON.parse(importDataResponseBody);
-                    ai.log.logInfo('Getting row count...', `${data.length} rows`);
-                    
-                    if (JSON.parse(data.Header.Option[0].Value)) {
-                        ai.log.logInfo("No data found for this account");
+                        // Locate the embedded object within the JSON response containing the rows of data
+                        var data = JSON.parse(importDataResponseBody);
+                        
+                        if (JSON.parse(data.Header.Option[0].Value)) {
+                            // ai.log.logInfo("No data found for this account");
+                        } else {
+                            var dataHeaderActId = JSON.parse(importDataResponseBody).Rows.Row[0].Header.ColData[0].id;  // Get internal QB account id
+                            // ai.log.logInfo('Acct ID: ', JSON.stringify(dataHeaderActId));
+                        }
+                        
+                        var dataLocation;
+                        var dataLength;
+    
+                        switch(true) {
+                            case JSON.parse(data.Header.Option[0].Value):
+                                ai.log.logInfo("No data in this row"); break;
+                            case data.Rows.Row[0].Rows.Row[0].hasOwnProperty('ColData'):
+                                dataLocation = data.Rows.Row[0].Rows.Row;
+                                dataLength = data.Rows.Row[0].Rows.Row.length;
+                                importData(dataLength, dataLocation); break;
+                            case data.Rows.Row[0].Rows.Row[0].Rows.Row[0].hasOwnProperty('ColData'):
+                                dataLocation = data.Rows.Row[0].Rows.Row[0].Rows.Row;
+                                dataLength = data.Rows.Row[0].Rows.Row[0].Rows.Row.length;
+                                importData(dataLength, dataLocation); break;
+                            default:
+                                ai.log.logInfo("nothing found to swtich");
+                        }
+                        
                     } else {
-                        var dataHeaderActId = JSON.parse(importDataResponseBody).Rows.Row[0].Header.ColData[0].id;  // Get internal QB account id
-                        ai.log.logInfo('Acct ID: ', JSON.stringify(dataHeaderActId));
+                        ai.log.logError('Error retrieving account data from source.');
+                        throw "Error";
                     }
-                    
-                    var dataLocation;
-                    var dataLength;
-
-                    switch(true) {
-                        case JSON.parse(data.Header.Option[0].Value):
-                            ai.log.logInfo("No data in this row"); break;
-                        case data.Rows.Row[0].Rows.Row[0].hasOwnProperty('ColData'):
-                            dataLocation = data.Rows.Row[0].Rows.Row;
-                            dataLength = data.Rows.Row[0].Rows.Row.length;
-                            importData(dataLength, dataLocation); break;
-                        case data.Rows.Row[0].Rows.Row[0].Rows.Row[0].hasOwnProperty('ColData'):
-                            dataLocation = data.Rows.Row[0].Rows.Row[0].Rows.Row;
-                            dataLength = data.Rows.Row[0].Rows.Row[0].Rows.Row.length;
-                            importData(dataLength, dataLocation); break;
-                        default:
-                            ai.log.logInfo("nothing found to swtich");
-                    }
-                    
                 } else {
-                    ai.log.logError('Error retrieving account data from source.');
+                    ai.log.logError('tableId does not match current table');
                     throw "Error";
                 }
-            } else {
-                ai.log.logError('tableId does not match current table');
-                throw "Error";
             }
         }
     } else {
